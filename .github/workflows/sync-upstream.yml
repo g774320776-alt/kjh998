@@ -1,0 +1,29 @@
+name: 每日早上8点同步上游仓库
+on:
+  schedule:
+    # UTC时间0点 = 北京时间早上8点
+    - cron: '0 0 * * *'
+  # 支持手动一键测试运行
+  workflow_dispatch:
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 拉取本仓库代码
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: 同步上游 phu889/kjh998 main分支
+        env:
+          UPSTREAM: phu889/kjh998
+          TARGET_BRANCH: main
+        run: |
+          git config --global user.name "GitHub-Actions-Bot"
+          git config --global user.email "bot@github.com"
+          git remote add upstream https://github.com/${UPSTREAM}.git
+          git fetch upstream
+          git checkout ${TARGET_BRANCH}
+          git merge upstream/${TARGET_BRANCH} --no-edit
+          git push origin ${TARGET_BRANCH}
